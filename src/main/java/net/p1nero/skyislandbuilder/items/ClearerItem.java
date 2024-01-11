@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class Clearer extends Item {
+public class ClearerItem extends Item {
 
-    public Clearer(Properties properties) {
+    public ClearerItem(Properties properties) {
         super(properties);
     }
 
