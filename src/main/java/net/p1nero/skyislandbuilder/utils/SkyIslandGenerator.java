@@ -4,6 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
+import org.spongepowered.noise.module.source.Billow;
+import org.spongepowered.noise.module.source.Perlin;
+import org.spongepowered.noise.module.source.Simplex;
 
 public class SkyIslandGenerator {
 
@@ -43,11 +46,28 @@ public class SkyIslandGenerator {
     }
 
     public void perlin(){
-        PerlinNoise perlinNoise = PerlinNoise.create(RandomSource.create(),frequency,amplitude);
+        Perlin perlin = new Perlin();
         for(int x=0 ; x<width ; x++){
             for(int z=0 ; z<length ; z++){
-                map[x][z] = (int)perlinNoise.getValue(x,0,z);
+                map[x][z] = (int) perlin.get(x,0,z);
             }
+        }
+    }
+
+    public static void main(String[] args) {
+        PerlinNoise perlinNoise = PerlinNoise.create(RandomSource.create(),1,0.5);
+        double[][] skyIsland = new double[100][100];
+        for(int x=0 ; x<100 ; x++){
+            for(int z=0 ; z<100 ; z++){
+                skyIsland[x][z] = (int)perlinNoise.getValue(x,0,z);
+            }
+        }
+        // 打印天空岛高度模型
+        for (double[] row : skyIsland) {
+            for (double value : row) {
+                System.out.print(String.format("%.0f ",value*1000));
+            }
+            System.out.println();
         }
     }
 

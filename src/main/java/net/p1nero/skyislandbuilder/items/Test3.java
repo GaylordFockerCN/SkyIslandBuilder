@@ -1,16 +1,12 @@
 package net.p1nero.skyislandbuilder.items;
 
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.synth.PerlinNoise;
-import org.spongepowered.noise.module.source.Perlin;
-
-import org.spongepowered.noise.module.source.Simplex;
-
 import java.util.Random;
 
-public class Test2 {
+public class Test3 {
     private static final int WIDTH = 100;
     private static final int HEIGHT = 100;
+
+    private static final int MAX_HEIGHT = 100;
     private static final double SCALE = 0.1;
     private static final int OCTAVES = 6;
     private static final double PERSISTENCE = 0.5;
@@ -18,33 +14,54 @@ public class Test2 {
     private static final int SEED = 0;
 
     public static void main(String[] args) {
-        double[][] skyIsland = generateSkyIsland(WIDTH, HEIGHT, SCALE, OCTAVES, PERSISTENCE, LACUNARITY, SEED);
+        double[][] skyIsland = generateSkyIsland(WIDTH, HEIGHT, SCALE, OCTAVES, PERSISTENCE, LACUNARITY, SEED, MAX_HEIGHT);
         for (double[] row : skyIsland) {
             for (double value : row) {
-                System.out.print(String.format("%.0f ",value*1000));
+                System.out.print(String.format("%.0f ", value*MAX_HEIGHT/10));
+//                System.out.print(value+' ');
             }
             System.out.println();
         }
-
-
     }
 
-    public static double[][] generateSkyIsland(int width, int height, double scale, int octaves, double persistence, double lacunarity, int seed) {
+    public static double[][] generateSkyIsland(int width, int height, double scale, int octaves, double persistence, double lacunarity, int seed, int maxHeight) {
         double[][] skyIsland = new double[height][width];
         Random random = new Random(seed);
         int centerX = width / 2;
         int centerY = height / 2;
-        double maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+        double maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 double nx = x / (double) width * scale;
                 double ny = y / (double) height * scale;
-                double distanceToCenter = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                double distanceToCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
                 double normalizedDistance = distanceToCenter / maxDistance;
-                double value = noise(nx, ny, octaves, persistence, lacunarity, random) * (1 - normalizedDistance);
+                if (normalizedDistance >= 1) {
+                    skyIsland[y][x] = 0;
+                    continue;
+                }
+                double value = noise(nx, ny, octaves, persistence, lacunarity, random) * (1 - normalizedDistance) * maxHeight;
 
                 skyIsland[y][x] = value;
+            }
+        }
+
+        // 找出最高值
+        double maxEdgeValue = -Double.MAX_VALUE;
+        for (int x = 0; x < width; x++) {
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[0][x]);
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[height - 1][x]);
+        }
+        for (int y = 0; y < height; y++) {
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[y][0]);
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[y][width - 1]);
+        }
+
+        // 减去最高值并设为0
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                skyIsland[y][x] = Math.max(skyIsland[y][x] - maxEdgeValue, 0);
             }
         }
 
@@ -59,9 +76,7 @@ public class Test2 {
 
         for (int i = 0; i < octaves; i++) {
             total += interpolatedNoise(x * frequency, y * frequency, random) * amplitude;
-
             maxNoiseValue += amplitude;
-
             frequency *= lacunarity;
             amplitude *= persistence;
         }
