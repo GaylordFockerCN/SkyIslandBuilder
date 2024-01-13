@@ -1,75 +1,200 @@
 package net.p1nero.skyislandbuilder.utils;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.synth.PerlinNoise;
-import org.spongepowered.noise.module.source.Billow;
-import org.spongepowered.noise.module.source.Perlin;
-import org.spongepowered.noise.module.source.Simplex;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Random;
 
 public class SkyIslandGenerator {
 
-    private int height = 10;
-    private int width = 10;
-    private int length = 10;
+    private int height = 20;
+    private int width = 20;
 
-    private int frequency = 1;
-    private double amplitude = 0.5;
+    private int maxHeight = 10;
+    private double scale = 0.1;
+    private int octaves = 6;
+    private double persistence = 0.5;
+    private double lacunarity = 2.0;
+    private int seed = 0;
+    private Random random;
     private BlockPos bottom;
     private Level level;
-    private int[][] map;
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setMaxHeight(int maxHeight) {
+        this.maxHeight = maxHeight;
+    }
+
+    public void setScale(double scale) {
+        this.scale = scale;
+    }
+
+    public void setOctaves(int octaves) {
+        this.octaves = octaves;
+    }
+
+    public void setPersistence(double persistence) {
+        this.persistence = persistence;
+    }
+
+    public void setLacunarity(double lacunarity) {
+        this.lacunarity = lacunarity;
+    }
+
+    public void setSeed(int seed) {
+        this.seed = seed;
+        random.setSeed(seed);
+    }
+
+    public void setBottom(BlockPos bottom) {
+        this.bottom = bottom;
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
+    }
 
     public SkyIslandGenerator(BlockPos bottom, Level level){
         this.bottom = bottom;
         this.level = level;
-        map = new int[width][length];
+        random = new Random(seed);
     }
 
-    public static SkyIslandGenerator create(BlockPos bottom, Level level){
-        return new SkyIslandGenerator(bottom,level);
-    }
-
-    public static SkyIslandGenerator create(BlockPos bottom, Level level, int height, int width, int length){
-        SkyIslandGenerator skyIslandGenerator = create(bottom,level);
-        skyIslandGenerator.height = height;
-        skyIslandGenerator.width = width;
-        skyIslandGenerator.length = length;
-        return skyIslandGenerator;
-    }
-
-    public static SkyIslandGenerator create(BlockPos bottom, Level level, int frequency, double amplitude, int height, int width, int length){
-        SkyIslandGenerator skyIslandGenerator = create(bottom,level,height,width,length);
-        skyIslandGenerator.frequency = frequency;
-        skyIslandGenerator.amplitude = amplitude;
-        return skyIslandGenerator;
-    }
-
-    public void perlin(){
-        Perlin perlin = new Perlin();
-        for(int x=0 ; x<width ; x++){
-            for(int z=0 ; z<length ; z++){
-                map[x][z] = (int) perlin.get(x,0,z);
+    public void printSkyIsland() {
+        double[][] skyIsland = generateSkyIsland(width, height, scale, octaves, persistence, lacunarity, seed, maxHeight*10);
+        int maxHeight = -1;
+        int max_x = 0, max_z = 0;
+        for (int x = 0; x < width; x++) {
+            for (int z = 0; z < height; z++) {
+                if (skyIsland[x][z] > maxHeight) {
+                    maxHeight = (int)skyIsland[x][z];
+                    max_x = x;
+                    max_z = z;
+                }
+                System.out.print("("+x+','+z+"):"+(int)skyIsland[x][z]+" ");
             }
+            System.out.println();
         }
-    }
 
-    public static void main(String[] args) {
-        PerlinNoise perlinNoise = PerlinNoise.create(RandomSource.create(),1,0.5);
-        double[][] skyIsland = new double[100][100];
-        for(int x=0 ; x<100 ; x++){
-            for(int z=0 ; z<100 ; z++){
-                skyIsland[x][z] = (int)perlinNoise.getValue(x,0,z);
-            }
-        }
-        // 打印天空岛高度模型
-        for (double[] row : skyIsland) {
-            for (double value : row) {
-                System.out.print(String.format("%.0f ",value*1000));
+        for (int x = 0; x < width; x++) {
+            for (int z = 0; z < height; z++) {
+                for(int y = bottom.getY()+maxHeight ; y>bottom.getY()+maxHeight-skyIsland[x][z] ; y--){
+                    if(level.isClientSide){
+                        level.setBlock(new BlockPos(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z), Blocks.DIRT.defaultBlockState(),1);
+                    }
+                    level.setBlockAndUpdate(new BlockPos(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z), Blocks.DIRT.defaultBlockState());
+                }
             }
             System.out.println();
         }
     }
 
+    private double[][] generateSkyIsland(int width, int height, double scale, int octaves, double persistence, double lacunarity, int seed, int maxHeight) {
+        setSeed(seed);
+        double[][] skyIsland = new double[height][width];
+        int centerX = width / 2;
+        int centerY = height / 2;
+        double maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                double nx = x / (double) width * scale;
+                double ny = y / (double) height * scale;
+                double distanceToCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                double normalizedDistance = distanceToCenter / maxDistance;
+                if (normalizedDistance >= 1) {
+                    skyIsland[y][x] = 0;
+                    continue;
+                }
+                double value = noise(nx, ny, octaves, persistence, lacunarity) * (1 - normalizedDistance) * maxHeight;
+
+                skyIsland[y][x] = value;
+            }
+        }
+
+        // 找出最高值
+        double maxEdgeValue = -Double.MAX_VALUE;
+        for (int x = 0; x < width; x++) {
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[0][x]);
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[height - 1][x]);
+        }
+        for (int y = 0; y < height; y++) {
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[y][0]);
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[y][width - 1]);
+        }
+
+        // 减去最高值并设为0
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                skyIsland[y][x] = Math.max(skyIsland[y][x] - maxEdgeValue, 0);
+            }
+        }
+
+        return skyIsland;
+    }
+
+    private double noise(double x, double y, int octaves, double persistence, double lacunarity) {
+        double total = 0;
+        double frequency = 1;
+        double amplitude = 1;
+        double maxNoiseValue = 0;
+
+        for (int i = 0; i < octaves; i++) {
+            total += interpolatedNoise(x * frequency, y * frequency) * amplitude;
+            maxNoiseValue += amplitude;
+            frequency *= lacunarity;
+            amplitude *= persistence;
+        }
+
+        return total / maxNoiseValue;
+    }
+
+    private double interpolatedNoise(double x, double y) {
+        int ix = (int) x;
+        int iy = (int) y;
+        double fx = x - ix;
+        double fy = y - iy;
+
+        double v1 = smoothNoise(ix, iy);
+        double v2 = smoothNoise(ix + 1, iy);
+        double v3 = smoothNoise(ix, iy + 1);
+        double v4 = smoothNoise(ix + 1, iy + 1);
+
+        double i1 = interpolate(v1, v2, fx);
+        double i2 = interpolate(v3, v4, fx);
+
+        return interpolate(i1, i2, fy);
+    }
+
+    private double smoothNoise(int x, int y) {
+        double corners = (noise2D(x - 1, y - 1) + noise2D(x + 1, y - 1)
+                + noise2D(x - 1, y + 1) + noise2D(x + 1, y + 1)) / 16.0;
+        double sides = (noise2D(x - 1, y) + noise2D(x + 1, y)
+                + noise2D(x, y - 1) + noise2D(x, y + 1)) / 8.0;
+        double center = noise2D(x, y) / 4.0;
+
+        return corners + sides + center;
+    }
+
+    public double interpolate(double a, double b, double blend) {
+        double theta = blend * Math.PI;
+        double f = (1 - Math.cos(theta)) * 0.5;
+
+        return a * (1 - f) + b * f;
+    }
+
+    private double noise2D(int x, int y) {
+        random.setSeed(x * 49632 + y * 325176 + seed);
+        return random.nextDouble() * 2 - 1;
+    }
 
 }

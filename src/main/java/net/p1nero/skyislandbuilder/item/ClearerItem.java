@@ -1,4 +1,4 @@
-package net.p1nero.skyislandbuilder.items;
+package net.p1nero.skyislandbuilder.item;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -21,14 +21,16 @@ public class ClearerItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        DFS_Clear(context.getClickedPos(),context.getLevel());
+        Level level = context.getLevel();
+        if(!level.isClientSide()){
+            DFS_Clear(context.getClickedPos(),context.getLevel());
+        }
         return super.useOn(context);
     }
 
     @Override
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag flag) {
-        //list.add(Component.translatable("tips.clearer"));
-        list.add(Component.literal("慎重使用！！！"));
+        list.add(Component.translatable("tips.clearer"));
         super.appendHoverText(itemStack, level, list, flag);
     }
 
@@ -37,7 +39,8 @@ public class ClearerItem extends Item {
         if(level.getBlockState(pos).getBlock() instanceof AirBlock){
             return;
         }
-        level.destroyBlock(pos,true);//以后可以改成在配置文件里面设置是否显示特效
+
+        level.destroyBlock(pos,false);//以后可以改成在配置文件里面设置是否显示特效
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();

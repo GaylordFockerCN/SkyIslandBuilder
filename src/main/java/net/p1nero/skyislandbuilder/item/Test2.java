@@ -1,10 +1,4 @@
-package net.p1nero.skyislandbuilder.items;
-
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.synth.PerlinNoise;
-import org.spongepowered.noise.module.source.Perlin;
-
-import org.spongepowered.noise.module.source.Simplex;
+package net.p1nero.skyislandbuilder.item;
 
 import java.util.Random;
 

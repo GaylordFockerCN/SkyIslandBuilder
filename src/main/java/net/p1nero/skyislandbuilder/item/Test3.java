@@ -1,4 +1,4 @@
-package net.p1nero.skyislandbuilder.items;
+package net.p1nero.skyislandbuilder.item;
 
 import java.util.Random;
 
@@ -6,7 +6,7 @@ public class Test3 {
     private static final int WIDTH = 100;
     private static final int HEIGHT = 100;
 
-    private static final int MAX_HEIGHT = 100;
+    private static final int MAX_HEIGHT = 25;
     private static final double SCALE = 0.1;
     private static final int OCTAVES = 6;
     private static final double PERSISTENCE = 0.5;
@@ -14,10 +14,10 @@ public class Test3 {
     private static final int SEED = 0;
 
     public static void main(String[] args) {
-        double[][] skyIsland = generateSkyIsland(WIDTH, HEIGHT, SCALE, OCTAVES, PERSISTENCE, LACUNARITY, SEED, MAX_HEIGHT);
+        double[][] skyIsland = generateSkyIsland(WIDTH, HEIGHT, SCALE, OCTAVES, PERSISTENCE, LACUNARITY, SEED, MAX_HEIGHT*10);
         for (double[] row : skyIsland) {
             for (double value : row) {
-                System.out.print(String.format("%.0f ", value*MAX_HEIGHT/10));
+                System.out.print(String.format("%.0f ", value));
 //                System.out.print(value+' ');
             }
             System.out.println();

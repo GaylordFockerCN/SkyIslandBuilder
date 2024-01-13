@@ -1,4 +1,4 @@
-package net.p1nero.skyislandbuilder.items;
+package net.p1nero.skyislandbuilder.item;
 import java.util.Random;
 
 public class Test {
