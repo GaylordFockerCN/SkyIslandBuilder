@@ -2,15 +2,13 @@ package net.p1nero.skyislandbuilder.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Random;
 
 public class SkyIslandGenerator {
 
-    private int height = 20;
+    private int length = 20;
     private int width = 20;
 
     private int maxHeight = 10;
@@ -20,10 +18,8 @@ public class SkyIslandGenerator {
     private double lacunarity = 2.0;
     private int seed = 0;
     private Random random;
-    private BlockPos bottom;
-    private Level level;
-    public void setHeight(int height) {
-        this.height = height;
+    public void setLength(int length) {
+        this.length = length;
     }
 
     public void setWidth(int width) {
@@ -55,26 +51,16 @@ public class SkyIslandGenerator {
         random.setSeed(seed);
     }
 
-    public void setBottom(BlockPos bottom) {
-        this.bottom = bottom;
-    }
-
-    public void setLevel(Level level) {
-        this.level = level;
-    }
-
-    public SkyIslandGenerator(BlockPos bottom, Level level){
-        this.bottom = bottom;
-        this.level = level;
+    public SkyIslandGenerator(){
         random = new Random(seed);
     }
 
-    public void printSkyIsland() {
-        double[][] skyIsland = generateSkyIsland(width, height, scale, octaves, persistence, lacunarity, seed, maxHeight*10);
+    public void printSkyIsland(BlockPos bottom, Level level) {
+        double[][] skyIsland = generateSkyIsland(width, length, scale, octaves, persistence, lacunarity, seed, maxHeight*10);
         int maxHeight = -1;
         int max_x = 0, max_z = 0;
         for (int x = 0; x < width; x++) {
-            for (int z = 0; z < height; z++) {
+            for (int z = 0; z < length; z++) {
                 if (skyIsland[x][z] > maxHeight) {
                     maxHeight = (int)skyIsland[x][z];
                     max_x = x;
@@ -86,15 +72,14 @@ public class SkyIslandGenerator {
         }
 
         for (int x = 0; x < width; x++) {
-            for (int z = 0; z < height; z++) {
+            for (int z = 0; z < length; z++) {
                 for(int y = bottom.getY()+maxHeight ; y>bottom.getY()+maxHeight-skyIsland[x][z] ; y--){
                     if(level.isClientSide){
-                        level.setBlock(new BlockPos(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z), Blocks.DIRT.defaultBlockState(),1);
+                        //以最高点所在的点为中心打印
+                        level.setBlock(new BlockPos(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z), Blocks.DIRT.defaultBlockState(),3);
                     }
-                    level.setBlockAndUpdate(new BlockPos(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z), Blocks.DIRT.defaultBlockState());
                 }
             }
-            System.out.println();
         }
     }
 
