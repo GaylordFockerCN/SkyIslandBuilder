@@ -2,17 +2,16 @@ package net.p1nero.skyislandbuilder.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.Random;
 
 public class SkyIslandGenerator {
 
-    private int length = 20;
-    private int width = 20;
+    private int length = 250;
+    private int width = 50;
 
-    private int maxHeight = 10;
+    private int maxHeight = 50;
     private double scale = 0.1;
     private int octaves = 6;
     private double persistence = 0.5;
@@ -57,11 +56,11 @@ public class SkyIslandGenerator {
     }
 
     public void printSkyIsland(BlockPos bottom, Level level) {
-        double[][] skyIsland = generateSkyIsland(width, length, scale, octaves, persistence, lacunarity, seed, maxHeight*10);
+        double[][] skyIsland = generateSkyIsland(width, length, scale, octaves, persistence, lacunarity, maxHeight*10);
         int maxHeight = -1;
         int max_x = 0, max_z = 0;
-        for (int x = 0; x < width; x++) {
-            for (int z = 0; z < length; z++) {
+        for (int x = 0; x < length; x++) {
+            for (int z = 0; z < width; z++) {
                 if (skyIsland[x][z] > maxHeight) {
                     maxHeight = (int)skyIsland[x][z];
                     max_x = x;
@@ -73,28 +72,28 @@ public class SkyIslandGenerator {
         }
 
         BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(0,0,0);
-        for (int x = 0; x < width; x++) {
-            for (int z = 0; z < length; z++) {
+        for (int x = 0; x < length; x++) {
+            for (int z = 0; z < width; z++) {
                 for(int y = bottom.getY()+maxHeight ; y>bottom.getY()+maxHeight-skyIsland[x][z] ; y--){
                     //以最高点所在的点为中心打印
                     blockPos.set(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z);
-                    System.out.println(level.setBlock(blockPos, Blocks.DIRT.defaultBlockState(), 3));
+                    level.setBlock(blockPos, Blocks.DIRT.defaultBlockState(), 3);
                 }
             }
         }
     }
 
-    private double[][] generateSkyIsland(int width, int height, double scale, int octaves, double persistence, double lacunarity, int seed, int maxHeight) {
+    private double[][] generateSkyIsland(int width, int length, double scale, int octaves, double persistence, double lacunarity, int maxHeight) {
         setSeed(seed);
-        double[][] skyIsland = new double[height][width];
+        double[][] skyIsland = new double[length][width];
         int centerX = width / 2;
-        int centerY = height / 2;
+        int centerY = length / 2;
         double maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
 
-        for (int y = 0; y < height; y++) {
+        for (int y = 0; y < length; y++) {
             for (int x = 0; x < width; x++) {
                 double nx = x / (double) width * scale;
-                double ny = y / (double) height * scale;
+                double ny = y / (double) length * scale;
                 double distanceToCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
                 double normalizedDistance = distanceToCenter / maxDistance;
                 if (normalizedDistance >= 1) {
@@ -111,15 +110,15 @@ public class SkyIslandGenerator {
         double maxEdgeValue = -Double.MAX_VALUE;
         for (int x = 0; x < width; x++) {
             maxEdgeValue = Math.max(maxEdgeValue, skyIsland[0][x]);
-            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[height - 1][x]);
+            maxEdgeValue = Math.max(maxEdgeValue, skyIsland[length - 1][x]);
         }
-        for (int y = 0; y < height; y++) {
+        for (int y = 0; y < length; y++) {
             maxEdgeValue = Math.max(maxEdgeValue, skyIsland[y][0]);
             maxEdgeValue = Math.max(maxEdgeValue, skyIsland[y][width - 1]);
         }
 
         // 减去最高值并设为0
-        for (int y = 0; y < height; y++) {
+        for (int y = 0; y < length; y++) {
             for (int x = 0; x < width; x++) {
                 skyIsland[y][x] = Math.max(skyIsland[y][x] - maxEdgeValue, 0);
             }

@@ -1,5 +1,7 @@
 {
   "item.skyislandbuilder.clearer": "Clearer",
-  "tips.clearer": "Watch out!!!",
-  "creativetab.sky_island_builder_tab": "Sky Island Builder"
+  "item.skyislandbuilder.builder": "Builder",
+  "tips.clearer": "Right click block to clear all connected blocks. Watch out!!!",
+  "creativetab.sky_island_builder_tab": "Sky Island Generator",
+  "tips.perlin_builder": "Right click air to open Setting Window"
 }

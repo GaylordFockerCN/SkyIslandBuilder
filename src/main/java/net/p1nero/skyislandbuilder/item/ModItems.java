@@ -12,7 +12,7 @@ public class ModItems {
             DeferredRegister.create(ForgeRegistries.ITEMS, SkyIslandBuilderMod.MODID);
 
     public static  final RegistryObject<Item> CLEARER = ITEMS.register("clearer",()->new ClearerItem(new Item.Properties()));
-    public static  final RegistryObject<Item> PERLIN_BUILDER = ITEMS.register("perlin_builder",()->new PerlinSkyIslandBuilderItem(new Item.Properties()));
+    public static  final RegistryObject<Item> PERLIN_BUILDER = ITEMS.register("builder",()->new SkyIslandGeneratorItem(new Item.Properties()));
 
     public static void register(IEventBus bus){
         ITEMS.register(bus);

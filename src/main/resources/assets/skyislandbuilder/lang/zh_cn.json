@@ -1,4 +1,7 @@
 {
-  "item.skyislandbuilder.clearer": "清空",
-  "tips.clearer": "慎重使用!!!"
+  "item.skyislandbuilder.clearer": "清空器",
+  "item.skyislandbuilder.builder": "生成器",
+  "tips.clearer": "右键清除所有连着的方块。慎重使用!!!",
+  "creativetab.sky_island_builder_tab": "空岛生成器",
+  "tips.perlin_builder": "右键空气打开设置窗口"
 }
