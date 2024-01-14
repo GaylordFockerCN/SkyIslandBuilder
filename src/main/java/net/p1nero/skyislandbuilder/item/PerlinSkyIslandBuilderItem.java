@@ -16,6 +16,7 @@ public class PerlinSkyIslandBuilderItem extends Item {
     SkyIslandGenerator skyIslandGenerator;
     public PerlinSkyIslandBuilderItem(Properties properties) {
         super(properties);
+        skyIslandGenerator = new SkyIslandGenerator();
     }
 
     @Override
@@ -26,8 +27,10 @@ public class PerlinSkyIslandBuilderItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        SkyIslandGenerator skyIslandGenerator = new SkyIslandGenerator();
-        skyIslandGenerator.printSkyIsland(context.getClickedPos(),context.getLevel());
-        return super.useOn(context);
+        Level level = context.getLevel();
+        if(!level.isClientSide){
+            skyIslandGenerator.printSkyIsland(context.getClickedPos(),context.getLevel());
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 }

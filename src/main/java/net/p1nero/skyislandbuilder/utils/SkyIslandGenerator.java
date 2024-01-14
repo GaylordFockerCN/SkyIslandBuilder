@@ -2,6 +2,7 @@ package net.p1nero.skyislandbuilder.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.Random;
@@ -71,13 +72,13 @@ public class SkyIslandGenerator {
             System.out.println();
         }
 
+        BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(0,0,0);
         for (int x = 0; x < width; x++) {
             for (int z = 0; z < length; z++) {
                 for(int y = bottom.getY()+maxHeight ; y>bottom.getY()+maxHeight-skyIsland[x][z] ; y--){
-                    if(level.isClientSide){
-                        //以最高点所在的点为中心打印
-                        level.setBlock(new BlockPos(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z), Blocks.DIRT.defaultBlockState(),3);
-                    }
+                    //以最高点所在的点为中心打印
+                    blockPos.set(bottom.getX()+x-max_x,y,bottom.getZ()+z-max_z);
+                    System.out.println(level.setBlock(blockPos, Blocks.DIRT.defaultBlockState(), 3));
                 }
             }
         }

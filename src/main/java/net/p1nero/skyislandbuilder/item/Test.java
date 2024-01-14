@@ -1,4 +1,6 @@
 package net.p1nero.skyislandbuilder.item;
+import org.spongepowered.noise.module.source.Perlin;
+
 import java.util.Random;
 
 public class Test {
@@ -10,13 +12,22 @@ public class Test {
     private static final double LACUNARITY = 2.0;
     private static final int SEED = 0;
 
+//    public static void main(String[] args) {
+//        double[][] skyIsland = generateSkyIsland(WIDTH, HEIGHT, SCALE, OCTAVES, PERSISTENCE, LACUNARITY, SEED, new int[]{50, 50});
+//
+//        // 打印天空岛高度模型
+//        for (double[] row : skyIsland) {
+//            for (double value : row) {
+//                System.out.print(String.format("%.0f ",value*1000));
+//            }
+//            System.out.println();
+//        }
+//    }
     public static void main(String[] args) {
-        double[][] skyIsland = generateSkyIsland(WIDTH, HEIGHT, SCALE, OCTAVES, PERSISTENCE, LACUNARITY, SEED, new int[]{50, 50});
-
-        // 打印天空岛高度模型
-        for (double[] row : skyIsland) {
-            for (double value : row) {
-                System.out.print(String.format("%.0f ",value*1000));
+        Perlin perlin = new Perlin();
+        for(int i=0;i<100;i++){
+            for(int j=0;j<100;j++){
+                System.out.print(perlin.get(i,0,j)*50+50+' ');
             }
             System.out.println();
         }

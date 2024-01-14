@@ -15,6 +15,7 @@ import java.util.List;
 
 public class ClearerItem extends Item {
 
+    private BlockPos blockPos = new BlockPos(0,0,0);
     public ClearerItem(Properties properties) {
         super(properties);
     }
@@ -25,7 +26,7 @@ public class ClearerItem extends Item {
         if(!level.isClientSide()){
             DFS_Clear(context.getClickedPos(),context.getLevel());
         }
-        return super.useOn(context);
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override
