@@ -70,6 +70,12 @@ public class SkyIslandGenerator {
             }
             System.out.println();
         }
+        
+        //防止生成“空”岛
+        if(maxHeight == 0){
+            printSkyIsland(bottom,level);
+            return;
+        }
 
         BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(0,0,0);
         for (int x = 0; x < length; x++) {
